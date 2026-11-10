@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Absensi QR Sekolah</title>
+<style>
+:root{--bg:#eef2f7;--surface:#fff;--ink:#14243a;--muted:#5d6b7e;--line:#d5dce6;--navy:#173b67;--on-navy:#fff;--ok:#12794a;--ok-bg:#dff3e8;--warn:#9a5b00;--warn-bg:#fdf0d5;--err:#a8281f;--err-bg:#fbe4e1;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1520;--surface:#162232;--ink:#e6edf6;--muted:#93a2b6;--line:#2a3b52;--navy:#2f6cb5;--ok:#59d193;--ok-bg:#12382a;--warn:#f0b755;--warn-bg:#3b2d10;--err:#ff8f86;--err-bg:#40191a}}
+:root[data-theme="dark"]{--bg:#0d1520;--surface:#162232;--ink:#e6edf6;--muted:#93a2b6;--line:#2a3b52;--navy:#2f6cb5;--ok:#59d193;--ok-bg:#12382a;--warn:#f0b755;--warn-bg:#3b2d10;--err:#ff8f86;--err-bg:#40191a}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Figtree",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{background:var(--navy);color:var(--on-navy);padding:18px 16px 0}
+header h1{margin:0;font-size:1.45rem;font-weight:800;letter-spacing:-.01em}
+header p{margin:2px 0 14px;opacity:.85;font-size:.92rem}
+nav{display:flex;gap:4px;max-width:900px;margin:0 auto}
+nav button{flex:1;border:0;background:transparent;color:var(--on-navy);opacity:.7;font:inherit;font-weight:600;padding:12px 6px;border-radius:10px 10px 0 0;cursor:pointer}
+nav button[aria-selected="true"]{background:var(--bg);color:var(--ink);opacity:1}
+.hd{max-width:900px;margin:0 auto}
+main{max-width:900px;margin:0 auto;padding:16px}
+section[hidden]{display:none}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+h2{font-size:1.1rem;margin:0 0 12px}
+label{display:block;font-weight:600;font-size:.9rem;margin:10px 0 4px}
+input{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+input:focus-visible,button:focus-visible{outline:3px solid var(--navy);outline-offset:2px}
+.btn{font:inherit;font-weight:700;border:0;border-radius:8px;padding:11px 16px;background:var(--navy);color:var(--on-navy);cursor:pointer}
+.btn.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:6px 10px;font-size:.85rem}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.grid{display:grid;gap:16px}
+@media(min-width:760px){.grid.two{grid-template-columns:1fr 1fr}}
+.msg{border-radius:10px;padding:12px 14px;margin-top:12px}
+.msg.ok{background:var(--ok-bg);color:var(--ok)}.msg.warn{background:var(--warn-bg);color:var(--warn)}.msg.err{background:var(--err-bg);color:var(--err)}
+.msg b{display:block;font-size:1.05rem}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:600}
+td.empty{color:var(--muted);white-space:normal}
+canvas.card{width:100%;height:auto;border-radius:8px;border:1px solid var(--line);display:block}
+.video{position:relative;background:#000;border-radius:10px;overflow:hidden;aspect-ratio:4/3}
+.video video{width:100%;height:100%;object-fit:cover}
+.video .frame{position:absolute;inset:18%;border:3px solid #fff;border-radius:14px;box-shadow:0 0 0 999px rgba(0,0,0,.35)}
+.hint{color:var(--muted);font-size:.88rem}
+.stat{display:flex;gap:16px;flex-wrap:wrap}.stat div{flex:1;min-width:90px}.stat b{font-size:1.6rem;display:block}
+textarea{width:100%;min-height:90px;font:12px/1.4 ui-monospace,monospace;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px}
+</style>
+</head>
+<body>
+<header><div class="hd">
+<h1>Absensi Sekolah QR</h1>
+<p>Kartu pelajar dengan QR Code, scan lewat kamera HP atau laptop.</p>
+<nav role="tablist">
+<button role="tab" aria-selected="true" data-tab="murid">Data murid</button>
+<button role="tab" aria-selected="false" data-tab="scan">Scan absensi</button>
+<button role="tab" aria-selected="false" data-tab="rekap">Rekap mingguan</button>
+</nav></div></header>
+
+<main>
+<section id="murid">
+<div class="grid two">
+<div class="panel">
+<h2>Daftarkan murid</h2>
+<label for="idm">Nomor induk murid</label><input id="idm" placeholder="Contoh: 001" autocomplete="off">
+<label for="nm">Nama lengkap</label><input id="nm" placeholder="Masukkan nama murid" autocomplete="off">
+<div class="row"><button class="btn" id="btnDaftar">Daftarkan murid</button></div>
+<div id="hasilDaftar"></div>
+</div>
+<div class="panel">
+<h2>Kartu pelajar</h2>
+<canvas id="kartu" class="card" width="1200" height="700"></canvas>
+<p class="hint" id="kartuInfo">Kartu muncul setelah murid didaftarkan atau dipilih dari daftar.</p>
+<div class="row"><a class="btn alt" id="dlKartu" download="kartu.png" hidden>Unduh kartu PNG</a></div>
+</div>
+</div>
+<div class="panel">
+<h2>Murid terdaftar (<span id="jmlMurid">0</span>)</h2>
+<div class="scroll"><table><thead><tr><th>ID</th><th>Nama</th><th></th></tr></thead><tbody id="tbMurid"></tbody></table></div>
+</div>
+</section>
+
+<section id="scan" hidden>
+<div class="grid two">
+<div class="panel">
+<h2>Pindai QR Code</h2>
+<label for="tglScan">Tanggal absensi</label><input type="date" id="tglScan">
+<div class="video" style="margin-top:12px"><video id="vid" playsinline muted></video><div class="frame"></div></div>
+<div class="row">
+<button class="btn" id="btnKamera">Nyalakan kamera</button>
+<label class="btn alt" style="margin:0;cursor:pointer">Pilih foto QR<input type="file" id="file" accept="image/*" capture="environment" hidden></label>
+</div>
+<p class="hint">Jika kamera tidak bisa diakses, ambil atau pilih foto kartu lalu tunggu hasilnya.</p>
+<div id="hasilScan" aria-live="polite"></div>
+</div>
+<div class="panel">
+<h2>Kehadiran pada <span id="lblTgl"></span></h2>
+<div class="scroll"><table><thead><tr><th>ID</th><th>Nama</th><th>Waktu</th><th>Status</th></tr></thead><tbody id="tbHarian"></tbody></table></div>
+</div>
+</div>
+</section>
+
+<section id="rekap" hidden>
+<div class="panel">
+<h2>Laporan mingguan</h2>
+<label for="tglRekap">Tanggal awal minggu</label><input type="date" id="tglRekap">
+<div class="row"><button class="btn" id="btnRekap">Tampilkan rekap</button></div>
+<div id="ringkas" style="margin-top:12px"></div>
+</div>
+<div class="panel"><h2>Rekap per hari</h2>
+<div class="scroll"><table><thead><tr><th>Hari</th><th>Tanggal</th><th>Murid</th><th>Hadir</th><th>Alpa</th></tr></thead><tbody id="tbHari"></tbody></table></div></div>
+<div class="panel"><h2>Rekap per murid</h2>
+<div class="scroll"><table><thead><tr><th>ID</th><th>Nama</th><th>Hadir</th><th>Alpa</th></tr></thead><tbody id="tbRekapMurid"></tbody></table></div>
+<div class="row"><button class="btn alt" id="btnCopy">Salin CSV</button><a class="btn alt" id="dlCsv" download="rekap.csv" hidden>Unduh CSV</a></div>
+<textarea id="csvText" readonly hidden></textarea>
+</div>
+</section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const mem={};
+function load(k){try{const v=localStorage.getItem(k);if(v)return JSON.parse(v)}catch(e){}return mem[k]||[]}
+function save(k,v){mem[k]=v;try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+const pad=n=>String(n).padStart(2,'0');
+const fmtTgl=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const hariNama=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+let murid=load('murid_qr'), absensi=load('absensi_qr');
+
+/* Tab */
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  ['murid','scan','rekap'].forEach(id=>$('#'+id).hidden=id!==b.dataset.tab);
+  if(b.dataset.tab!=='scan')stopKamera();
+});
+
+/* Kartu pelajar */
+function gambarKartu(id,nama){
+  const c=$('#kartu'),g=c.getContext('2d');
+  g.fillStyle='#fff';g.fillRect(0,0,1200,700);
+  g.fillStyle='#173B67';g.fillRect(0,0,1200,140);
+  g.fillStyle='#fff';g.font='bold 48px sans-serif';g.textBaseline='top';g.fillText('KARTU PELAJAR',45,45);
+  g.fillStyle='#173B67';g.font='bold 34px sans-serif';g.fillText('IDENTITAS MURID',50,180);
+  g.fillStyle='#000';g.font='28px sans-serif';g.fillText('Nama:',50,280);
+  g.font='bold 34px sans-serif';g.fillText(nama.slice(0,35),50,330);
+  g.font='28px sans-serif';g.fillText('Nomor Induk:',50,420);
+  g.font='bold 34px sans-serif';g.fillText(id,50,470);
+  const qr=qrcode(0,'M');qr.addData('ABSENSI|'+id);qr.make();
+  const n=qr.getModuleCount(),tot=n+8,cell=390/tot;
+  g.fillStyle='#fff';g.fillRect(730,175,390,390);g.fillStyle='#000';
+  for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(qr.isDark(r,k))g.fillRect(730+(k+4)*cell,175+(r+4)*cell,Math.ceil(cell),Math.ceil(cell));
+  g.fillStyle='#173B67';g.font='28px sans-serif';g.fillText('SCAN UNTUK ABSENSI',770,585);
+  g.strokeStyle='#173B67';g.lineWidth=5;g.strokeRect(17,17,1166,666);
+  const a=$('#dlKartu');a.href=c.toDataURL('image/png');a.download='Kartu_'+id.replace(/[^a-zA-Z0-9_-]/g,'_')+'.png';a.hidden=false;
+  $('#kartuInfo').textContent='Kartu '+nama+' ('+id+'). Jika tombol unduh tidak berfungsi, tekan lama atau klik kanan gambar untuk menyimpan.';
+}
+
+/* Murid */
+function renderMurid(){
+  const d=[...murid].sort((a,b)=>a.nama.localeCompare(b.nama));
+  $('#jmlMurid').textContent=d.length;
+  $('#tbMurid').innerHTML=d.length?d.map(m=>`<tr><td>${esc(m.id)}</td><td>${esc(m.nama)}</td><td><button class="btn alt sm" data-k="${esc(m.id)}">Lihat kartu</button> <button class="btn alt sm" data-h="${esc(m.id)}">Hapus</button></td></tr>`).join(''):'<tr><td class="empty" colspan="3">Belum ada murid. Daftarkan murid pertama di atas.</td></tr>';
+}
+$('#tbMurid').onclick=e=>{
+  const k=e.target.dataset.k,h=e.target.dataset.h;
+  if(k){const m=murid.find(x=>x.id===k);gambarKartu(m.id,m.nama);$('#kartu').scrollIntoView({behavior:'smooth'})}
+  if(h&&confirm('Hapus murid '+h+' beserta data absensinya?')){
+    murid=murid.filter(x=>x.id!==h);absensi=absensi.filter(x=>x.id!==h);save('murid_qr',murid);save('absensi_qr',absensi);renderMurid();renderHarian();
+window.addEventListener('pagehide',stopKamera);
+  }
+};
+$('#btnDaftar').onclick=()=>{
+  const id=$('#idm').value.trim(),nama=$('#nm').value.trim(),box=$('#hasilDaftar');
+  if(!id||!nama){box.innerHTML='<div class="msg err"><b>Data belum lengkap</b>ID dan nama wajib diisi.</div>';return}
+  if(id.includes('|')){box.innerHTML='<div class="msg err"><b>ID tidak valid</b>ID tidak boleh memuat tanda |.</div>';return}
+  if(murid.some(m=>m.id===id)){box.innerHTML='<div class="msg err"><b>ID sudah terdaftar</b>Gunakan ID yang berbeda.</div>';return}
+  murid.push({id,nama});save('murid_qr',murid);
+  gambarKartu(id,nama);renderMurid();
+  box.innerHTML=`<div class="msg ok"><b>Pendaftaran berhasil</b>${esc(nama)} (${esc(id)}) sudah terdaftar dan kartu QR dibuat.</div>`;
+  $('#idm').value='';$('#nm').value='';
+};
+
+/* Scan */
+$('#tglScan').value=fmtTgl(new Date());
+$('#tglRekap').value=fmtTgl(new Date());
+function renderHarian(){
+  const t=$('#tglScan').value;$('#lblTgl').textContent=t;
+  const d=absensi.filter(a=>a.tgl===t).sort((a,b)=>a.waktu.localeCompare(b.waktu));
+  $('#tbHarian').innerHTML=d.length?d.map(a=>{const m=murid.find(x=>x.id===a.id);return `<tr><td>${esc(a.id)}</td><td>${esc(m?m.nama:'-')}</td><td>${a.waktu}</td><td>${a.status}</td></tr>`}).join(''):'<tr><td class="empty" colspan="4">Belum ada murid yang hadir pada tanggal ini.</td></tr>';
+}
+$('#tglScan').onchange=renderHarian;
+function proses(isi){
+  const box=$('#hasilScan'),t=$('#tglScan').value;
+  if(!t){box.innerHTML='<div class="msg err"><b>Tanggal kosong</b>Pilih tanggal absensi dulu.</div>';return}
+  if(!isi.startsWith('ABSENSI|')){box.innerHTML='<div class="msg err"><b>Bukan kartu absensi</b>QR Code ini bukan kartu absensi sekolah.</div>';return}
+  const id=isi.split('|').slice(1).join('|');
+  const m=murid.find(x=>x.id===id);
+  if(!m){box.innerHTML='<div class="msg err"><b>Murid belum terdaftar</b>ID '+esc(id)+' tidak ada di database.</div>';return}
+  if(absensi.some(a=>a.id===id&&a.tgl===t)){box.innerHTML=`<div class="msg warn"><b>Sudah absen</b>${esc(m.nama)} (${esc(id)}) sudah tercatat hadir pada ${t}.</div>`;return}
+  const now=new Date(),waktu=pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds());
+  absensi.push({id,tgl:t,waktu,status:'Hadir'});save('absensi_qr',absensi);
+  box.innerHTML=`<div class="msg ok"><b>Absensi berhasil</b>${esc(m.nama)} (${esc(id)}) hadir pada ${t} pukul ${waktu}.</div>`;
+  renderHarian();
+}
+let stream=null,raf=0,lastTxt='',lastAt=0;
+const vid=$('#vid'),cv=document.createElement('canvas'),cx=cv.getContext('2d',{willReadFrequently:true});
+async function nyalakan(){
+  const box=$('#hasilScan');
+  if(!window.isSecureContext){
+    box.innerHTML='<div class="msg err"><b>Halaman belum menggunakan HTTPS</b>Kamera hanya bisa dibuka melalui HTTPS atau localhost. Jangan buka file HTML langsung dari penyimpanan HP. Unggah aplikasi ke GitHub Pages atau Netlify, lalu buka tautannya.</div>';
+    return;
+  }
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    box.innerHTML='<div class="msg err"><b>Fitur kamera tidak tersedia</b>Buka aplikasi melalui Chrome atau Safari versi terbaru, bukan melalui pratinjau file.</div>';
+    return;
+  }
+  if(typeof jsQR!=='function'){
+    box.innerHTML='<div class="msg err"><b>Pemindai QR belum termuat</b>Periksa koneksi internet dan muat ulang halaman.</div>';
+    return;
+  }
+  try{
+    box.innerHTML='<div class="msg warn">Meminta izin kamera… Pilih Izinkan jika diminta browser.</div>';
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({
+        audio:false,
+        video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}}
+      });
+    }catch(err){
+      stream=await navigator.mediaDevices.getUserMedia({audio:false,video:true});
+    }
+    vid.setAttribute('playsinline','');
+    vid.muted=true;
+    vid.srcObject=stream;
+    await vid.play();
+    $('#btnKamera').textContent='Matikan kamera';
+    box.innerHTML='<div class="msg ok">Kamera aktif. Arahkan QR kartu pelajar ke kotak pemindai.</div>';
+    lastTxt='';lastAt=0;
+    loop();
+  }catch(e){
+    let pesan='Periksa izin kamera browser dan pastikan kamera tidak sedang digunakan aplikasi lain.';
+    if(e.name==='NotAllowedError'||e.name==='PermissionDeniedError') pesan='Izin kamera ditolak. Izinkan kamera untuk situs ini melalui pengaturan browser, lalu coba lagi.';
+    else if(e.name==='NotFoundError'||e.name==='DevicesNotFoundError') pesan='Kamera tidak ditemukan pada perangkat ini.';
+    else if(e.name==='NotReadableError'||e.name==='TrackStartError') pesan='Kamera sedang digunakan aplikasi lain atau tidak dapat dimulai.';
+    box.innerHTML='<div class="msg err"><b>Kamera tidak bisa dibuka</b>'+esc(pesan)+'</div>';
+    stopKamera();
+  }
+}
+function stopKamera(){
+  cancelAnimationFrame(raf);
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
+  vid.pause();
+  vid.srcObject=null;
+  $('#btnKamera').textContent='Nyalakan kamera';
+}
+function loop(){
+  if(!stream)return;
+  if(vid.readyState>=2&&vid.videoWidth&&typeof jsQR==='function'){
+    try{
+      cv.width=vid.videoWidth;cv.height=vid.videoHeight;cx.drawImage(vid,0,0);
+      const im=cx.getImageData(0,0,cv.width,cv.height);
+      const r=jsQR(im.data,im.width,im.height,{inversionAttempts:'attemptBoth'});
+      if(r&&r.data&&(r.data!==lastTxt||Date.now()-lastAt>4000)){
+        lastTxt=r.data;lastAt=Date.now();proses(r.data);
+      }
+    }catch(e){
+      $('#hasilScan').innerHTML='<div class="msg err"><b>Pemindaian terganggu</b>Muat ulang halaman dan coba nyalakan kamera kembali.</div>';
+      stopKamera();return;
+    }
+  }
+  raf=requestAnimationFrame(loop);
+}
+$('#btnKamera').onclick=()=>stream?stopKamera():nyalakan();
+$('#file').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const img=new Image();img.onload=()=>{
+    cv.width=img.width;cv.height=img.height;cx.drawImage(img,0,0);
+    const im=cx.getImageData(0,0,cv.width,cv.height),r=jsQR(im.data,im.width,im.height);
+    r?proses(r.data):$('#hasilScan').innerHTML='<div class="msg err"><b>QR tidak terbaca</b>Coba foto ulang dengan QR lebih dekat dan terang.</div>';
+    URL.revokeObjectURL(img.src);
+  };img.src=URL.createObjectURL(f);e.target.value='';
+};
+
+/* Rekap */
+let csvData='';
+$('#btnRekap').onclick=()=>{
+  const v=$('#tglRekap').value;if(!v)return;
+  const [y,m,d]=v.split('-').map(Number),awal=new Date(y,m-1,d),akhir=new Date(y,m-1,d+6);
+  if(!murid.length){$('#ringkas').innerHTML='<div class="msg warn"><b>Belum ada murid</b>Daftarkan murid terlebih dulu.</div>';return}
+  let th=0,ta=0,hr=[];const tgls=[];
+  for(let i=0;i<7;i++){
+    const dt=new Date(y,m-1,d+i),t=fmtTgl(dt);tgls.push(t);
+    const h=absensi.filter(a=>a.tgl===t&&a.status==='Hadir').length,al=murid.length-h;
+    th+=h;ta+=al;hr.push(`<tr><td>${hariNama[dt.getDay()]}</td><td>${t}</td><td>${murid.length}</td><td>${h}</td><td>${al}</td></tr>`);
+  }
+  const urut=[...murid].sort((a,b)=>a.nama.localeCompare(b.nama));
+  const rows=urut.map(s=>{const h=absensi.filter(a=>a.id===s.id&&tgls.includes(a.tgl)&&a.status==='Hadir').length;return [s.id,s.nama,h,7-h]});
+  $('#tbHari').innerHTML=hr.join('');
+  $('#tbRekapMurid').innerHTML=rows.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('');
+  $('#ringkas').innerHTML=`<p class="hint">Periode ${fmtTgl(awal)} sampai ${fmtTgl(akhir)}</p><div class="stat"><div><b>${murid.length}</b>Murid</div><div><b>${th}</b>Total hadir</div><div><b>${ta}</b>Total alpa</div><div><b>7</b>Hari</div></div>`;
+  const q=c=>'"'+String(c).replace(/"/g,'""')+'"';
+  csvData='\ufeffID Murid,Nama,Total Hadir,Total Alpa\n'+rows.map(r=>r.map(q).join(',')).join('\n');
+  const a=$('#dlCsv');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csvData);a.download='Rekap_'+v+'.csv';a.hidden=false;
+  $('#csvText').value=csvData.replace('\ufeff','');
+};
+$('#btnCopy').onclick=async()=>{
+  if(!csvData){$('#btnRekap').click();if(!csvData)return}
+  const ta=$('#csvText');ta.hidden=false;
+  try{await navigator.clipboard.writeText(ta.value);$('#btnCopy').textContent='CSV disalin'}catch(e){ta.select();$('#btnCopy').textContent='Salin manual dari kotak'}
+};
+
+renderMurid();renderHarian();
+window.addEventListener('pagehide',stopKamera);
+</script>
+</body>
+</html>
